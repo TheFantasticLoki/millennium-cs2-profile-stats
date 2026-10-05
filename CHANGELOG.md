@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Negative caching: stable provider misses (`not_found`, `private`, `unauthorized`) are now cached for 5 minutes and transient ones (`rate_limited`, `cloudflare_required`) for 2 minutes, so private or missing profiles no longer refetch on every render.
+- Stale-while-revalidate coalescing: when an identical provider fetch is already in flight (e.g. a profile re-render while the first batch is still loading), the backend serves the last cached response instead of duplicating the network work.
+- Cloudflare fail-fast: when a provider hits a Cloudflare challenge and FlareSolverr is unavailable, the backend now returns a structured `cloudflare_required` response immediately instead of handing the challenge page to the HTML parsers.
+
+### Fixed
+
+- Stop discarding provider responses that arrive after the frontend's initial 15s wait: slow providers are now only flagged as slow, and their data appears as soon as the backend finishes fetching it — no page refresh needed.
+- Only request providers the backend actually has registered and enabled (via `get_provider_configs`), so unimplemented or disabled providers no longer hang or pollute the loading state.
+
+### Changed
+
+- Provider fetches now run in a fixed priority order (Leetify, FACEIT, CSRep, CSTracker, CSStats — fast APIs first, scrapers last) on every backend path, matching the frontend's loading-segment order.
+- Replace the generic loading bar with a segmented progress indicator: one segment per provider that fills in as its data arrives, with the next segment animating while the backend (which fetches serially on a single Lua thread) works on it. Hovering a segment shows the provider name and its current state.
+
 ## [0.4.5] - 2026-08-15
 
 ### Added

@@ -14,7 +14,7 @@
 	overflow: hidden;
 	background: rgba(8, 15, 22, 0.96);
 	border: 1px solid rgba(102, 192, 244, 0.17);
-	border-radius: 4px;
+	border-radius: 10px;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
 }
 
@@ -1062,4 +1062,1649 @@
 @media (prefers-reduced-motion: reduce) {
 	.cs2ps-spinner { animation-duration: 1400ms; }
 	.cs2ps-chevron { transition: none; }
+	.cs2ps-loadseg-active::after { animation-duration: 2400ms; }
+	.cs2ps-loadseg-done .cs2ps-loadseg-fill { transition: none; }
+}
+
+/* ── Trust score row ─────────────────────────────────────────────── */
+
+.cs2ps-trust-row {
+	display: flex;
+	gap: 6px;
+	padding: 8px 14px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cs2ps-trust-item {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 8px;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.04);
+	font-size: 10px;
+}
+
+.cs2ps-trust-score {
+	font-weight: 700;
+	font-size: 13px;
+	color: #d6dce1;
+}
+
+.cs2ps-trust-label {
+	color: #718594;
+	font-size: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+}
+
+.cs2ps-trust-link {
+	color: #66c0f4;
+	text-decoration: none;
+	font-size: 9px;
+	margin-left: 2px;
+}
+
+.cs2ps-trust-link:hover {
+	color: #9bd8fa;
+	text-decoration: underline;
+}
+
+.cs2ps-trust-excellent .cs2ps-trust-score { color: #79c9ef; }
+.cs2ps-trust-good .cs2ps-trust-score { color: #78b8db; }
+.cs2ps-trust-moderate .cs2ps-trust-score { color: #c79a6b; }
+.cs2ps-trust-low .cs2ps-trust-score { color: #c8797c; }
+.cs2ps-trust-danger .cs2ps-trust-score { color: #e06f76; }
+
+.cs2ps-trust-detail {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 5px;
+	padding: 8px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.cs2ps-trust-detail span {
+	color: #687d8c;
+	font-size: 9px;
+}
+
+.cs2ps-trust-detail strong {
+	font-size: 12px;
+	font-weight: 600;
+	color: #d8e0e5;
+}
+
+/* ── Provider link buttons ───────────────────────────────────────── */
+
+.cs2ps-provider-links {
+	display: flex;
+	gap: 3px;
+	margin-left: 6px;
+}
+
+.cs2ps-provider-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	font-size: 10px;
+	text-decoration: none;
+	border-radius: 2px;
+	background: rgba(255, 255, 255, 0.06);
+	transition: background 120ms ease;
+}
+
+.cs2ps-provider-link:hover {
+	background: rgba(102, 192, 244, 0.2);
+}
+
+/* ── Providers comparison table ──────────────────────────────────── */
+
+.cs2ps-providers-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 10px;
+}
+
+.cs2ps-providers-table th {
+	padding: 6px 8px;
+	color: #718594;
+	font-size: 8px;
+	font-weight: 700;
+	text-align: left;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cs2ps-providers-table td {
+	padding: 7px 8px;
+	color: #c7d2da;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cs2ps-providers-table .cs2ps-providers-name {
+	color: #8ea6b7;
+	font-weight: 600;
+	font-size: 9px;
+}
+
+.cs2ps-providers-table tr:hover td {
+	background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Cloudflare verification section ────────────────────────────── */
+
+.cs2ps-cloudflare-section {
+	padding: 10px 14px;
+	border-top: 1px solid rgba(255, 190, 60, 0.2);
+	background: rgba(255, 190, 60, 0.04);
+}
+
+.cs2ps-cloudflare-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.cs2ps-cloudflare-icon {
+	font-size: 12px;
+}
+
+.cs2ps-cloudflare-title {
+	color: #c7a86b;
+	font-size: 9px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+}
+
+.cs2ps-cloudflare-providers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 8px;
+}
+
+.cs2ps-cloudflare-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	color: #d6d7d8;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 3px;
+	font-size: 9px;
+	font-weight: 500;
+	text-decoration: none;
+	transition: background 120ms ease, border-color 120ms ease;
+}
+
+.cs2ps-cloudflare-btn:hover {
+	background: rgba(102, 192, 244, 0.15);
+	border-color: rgba(102, 192, 244, 0.3);
+}
+
+.cs2ps-cloudflare-retry {
+	display: block;
+	width: 100%;
+	padding: 6px 0;
+	color: #66c0f4;
+	background: rgba(102, 192, 244, 0.08);
+	border: 1px solid rgba(102, 192, 244, 0.2);
+	border-radius: 3px;
+	font-size: 9px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 120ms ease;
+}
+
+.cs2ps-cloudflare-retry:hover {
+	background: rgba(102, 192, 244, 0.16);
+}
+
+.cs2ps-cloudflare-retry:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Aggregated Profile Styles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Inline aggregated summary (in main card body) ───────────────── */
+
+.cs2ps-agg-inline {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px 14px;
+	margin: 0 12px 6px;
+	background: linear-gradient(135deg, rgba(102, 192, 244, 0.06), rgba(139, 92, 246, 0.06));
+	border: 1px solid rgba(102, 192, 244, 0.12);
+	border-radius: 4px;
+	cursor: pointer;
+	transition: border-color 150ms ease, background 150ms ease;
+}
+
+.cs2ps-agg-inline:hover {
+	border-color: rgba(102, 192, 244, 0.25);
+	background: linear-gradient(135deg, rgba(102, 192, 244, 0.10), rgba(139, 92, 246, 0.10));
+}
+
+.cs2ps-agg-loading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: default;
+	border-color: rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.02);
+	opacity: 0.7;
+}
+
+.cs2ps-agg-inline-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.cs2ps-agg-inline-icon {
+	font-size: 12px;
+}
+
+.cs2ps-agg-inline-label {
+	color: #8ea6b7;
+	font-size: 9px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	text-transform: uppercase;
+}
+
+.cs2ps-agg-inline-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 10px;
+	color: #cbd5dc;
+	font-size: 11px;
+	line-height: 14px;
+}
+
+.cs2ps-agg-inline-stats strong {
+	font-weight: 600;
+}
+
+.cs2ps-agg-inline-sep {
+	color: #5e7382;
+}
+
+/* ── Provider badges ─────────────────────────────────────────────── */
+
+.cs2ps-provider-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	padding: 6px 14px 8px;
+}
+
+.cs2ps-provider-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 2px 6px;
+	font-size: 8px;
+	font-weight: 600;
+	line-height: 12px;
+	color: var(--badge-color, #8ea6b7);
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 3px;
+	letter-spacing: 0.2px;
+}
+
+/* ── Aggregated stat grid ────────────────────────────────────────── */
+
+.cs2ps-agg-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1px;
+	padding: 0 12px 8px;
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.cs2ps-agg-stat {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+	padding: 5px 8px;
+	background: rgba(0, 0, 0, 0.12);
+	border-radius: 3px;
+}
+
+.cs2ps-agg-stat-label {
+	flex: 0 0 auto;
+	color: #6f8493;
+	font-size: 9px;
+	font-weight: 500;
+	letter-spacing: 0.3px;
+	text-transform: uppercase;
+}
+
+.cs2ps-agg-stat-value {
+	flex: 1 1 auto;
+	color: #e0e6ea;
+	font-size: 12px;
+	font-weight: 700;
+	text-align: right;
+}
+
+.cs2ps-agg-stat-sources {
+	flex: 0 0 auto;
+	display: flex;
+	gap: 2px;
+}
+
+/* ── Source badges (inline) ──────────────────────────────────────── */
+
+.cs2ps-src-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 1px;
+	padding: 1px 4px;
+	font-size: 7px;
+	font-weight: 600;
+	line-height: 10px;
+	color: var(--src-color, #8ea6b7);
+	background: rgba(255, 255, 255, 0.04);
+	border-radius: 2px;
+	letter-spacing: 0.15px;
+	white-space: nowrap;
+}
+
+.cs2ps-src-default {
+	color: #6f8493;
+}
+
+/* ── Aggregated detail panel ─────────────────────────────────────── */
+
+.cs2ps-panel-aggregated {
+	padding: 0;
+}
+
+.cs2ps-agg-detail {
+	padding: 10px 0;
+}
+
+.cs2ps-agg-detail .cs2ps-provider-badges {
+	justify-content: center;
+	padding: 6px 14px 10px;
+}
+
+.cs2ps-agg-detail-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1px;
+}
+
+.cs2ps-agg-detail .cs2ps-agg-stat {
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 0;
+}
+
+.cs2ps-agg-highlight {
+	background: rgba(102, 192, 244, 0.06) !important;
+}
+
+/* ── Attributed value ────────────────────────────────────────────── */
+
+.cs2ps-attr-value {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.cs2ps-attr-sources {
+	display: inline-flex;
+	gap: 2px;
+	margin-left: 2px;
+}
+
+/* ── Panel header extras ─────────────────────────────────────────── */
+
+.cs2ps-panel-count,
+.cs2ps-panel-source {
+	margin-left: auto;
+	font-size: 8px;
+	font-weight: 500;
+	color: #6f8493;
+	letter-spacing: 0.2px;
+}
+
+.cs2ps-panel-source {
+	display: inline-flex;
+	gap: 3px;
+}
+
+/* ── Clutch grid ─────────────────────────────────────────────────── */
+
+.cs2ps-agg-clutch-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.cs2ps-agg-clutch-row {
+	display: grid;
+	grid-template-columns: 40px 40px 40px 50px 1fr;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	background: rgba(0, 0, 0, 0.12);
+	font-size: 11px;
+}
+
+.cs2ps-agg-clutch-label {
+	color: #8ea6b7;
+	font-weight: 600;
+	font-size: 10px;
+	letter-spacing: 0.3px;
+}
+
+.cs2ps-agg-clutch-wins {
+	color: #67a97c;
+	font-weight: 600;
+	text-align: right;
+}
+
+.cs2ps-agg-clutch-losses {
+	color: #b55a67;
+	font-weight: 600;
+	text-align: right;
+}
+
+.cs2ps-agg-clutch-winrate {
+	color: #cbd5dc;
+	font-weight: 700;
+	text-align: right;
+}
+
+.cs2ps-agg-clutch-sources {
+	display: flex;
+	gap: 2px;
+	justify-content: flex-end;
+}
+
+/* ── Kill breakdown grid ─────────────────────────────────────────── */
+
+.cs2ps-agg-kb-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.cs2ps-agg-kb-item {
+	display: grid;
+	grid-template-columns: 1fr 50px 70px auto;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	background: rgba(0, 0, 0, 0.12);
+	font-size: 11px;
+}
+
+.cs2ps-agg-kb-label {
+	color: #8ea6b7;
+	font-size: 10px;
+	font-weight: 500;
+	text-transform: capitalize;
+}
+
+.cs2ps-agg-kb-pct {
+	color: #e0e6ea;
+	font-weight: 700;
+	text-align: right;
+}
+
+.cs2ps-agg-kb-count {
+	color: #6f8493;
+	font-size: 9px;
+	text-align: right;
+}
+
+.cs2ps-agg-kb-sources {
+	display: flex;
+	gap: 2px;
+	justify-content: flex-end;
+}
+
+/* ── Trust detail ────────────────────────────────────────────────── */
+
+.cs2ps-agg-trust-detail {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 8px 12px;
+}
+
+.cs2ps-agg-trust-source {
+	padding: 6px 8px;
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 3px;
+}
+
+.cs2ps-agg-trust-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.cs2ps-agg-trust-name {
+	color: #8ea6b7;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.cs2ps-agg-trust-score {
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.cs2ps-agg-trust-breakdown {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 8px;
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cs2ps-agg-trust-factor {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 9px;
+}
+
+.cs2ps-agg-trust-factor-name {
+	color: #6f8493;
+}
+
+.cs2ps-agg-trust-factor-delta,
+.cs2ps-agg-trust-factor-value {
+	font-weight: 600;
+	color: #cbd5dc;
+}
+
+.cs2ps-positive {
+	color: #67a97c;
+}
+
+.cs2ps-negative {
+	color: #b55a67;
+}
+
+.cs2ps-agg-trust-ban {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 12px;
+	color: #f59e0b;
+	font-size: 11px;
+	font-weight: 600;
+	background: rgba(245, 158, 11, 0.08);
+	border-radius: 3px;
+}
+
+/* ── Match history ───────────────────────────────────────────────── */
+
+.cs2ps-agg-matches {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.cs2ps-agg-match {
+	display: grid;
+	grid-template-columns: 24px 1fr 50px 60px 50px 50px auto;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	background: rgba(0, 0, 0, 0.12);
+	font-size: 10px;
+	transition: background 100ms ease;
+}
+
+.cs2ps-agg-match:hover {
+	background: rgba(0, 0, 0, 0.20);
+}
+
+.cs2ps-agg-match-result {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	font-size: 10px;
+	font-weight: 700;
+	border-radius: 3px;
+}
+
+.cs2ps-agg-match .cs2ps-form-win {
+	color: #67a97c;
+	background: rgba(103, 169, 124, 0.15);
+}
+
+.cs2ps-agg-match .cs2ps-form-loss {
+	color: #b55a67;
+	background: rgba(181, 90, 103, 0.15);
+}
+
+.cs2ps-agg-match .cs2ps-unknown {
+	color: #6f8493;
+	background: rgba(111, 132, 147, 0.1);
+}
+
+.cs2ps-agg-match-map {
+	color: #e0e6ea;
+	font-weight: 600;
+	font-size: 11px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cs2ps-agg-match-score {
+	color: #8ea6b7;
+	font-weight: 600;
+	text-align: right;
+}
+
+.cs2ps-agg-match-kd {
+	color: #cbd5dc;
+	font-weight: 500;
+	text-align: right;
+}
+
+.cs2ps-agg-match-adr,
+.cs2ps-agg-match-rating {
+	color: #6f8493;
+	text-align: right;
+}
+
+.cs2ps-agg-match-sources {
+	display: flex;
+	gap: 2px;
+	justify-content: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CS2 Overview Banner (collapsed sidebar card)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* No bottom margin here: the banner is the first child of .cs2ps-card and
+   any leftover margin shows up as a sliver of card background below it
+   (visible even when the dropdown is collapsed). */
+.cs2ps-banner {
+	margin: 0;
+	position: relative;
+	background: rgba(8, 15, 22, 0.96);
+	border: 0;
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: none;
+}
+
+/* Segmented provider loading bar pinned to the banner's bottom edge —
+   shown while providers are still fetching; existing data stays visible.
+   One segment per provider in stable display order: active = animated
+   sweep in the provider color (all in-flight segments animate at once —
+   the backend fetches providers in parallel), done = filled, error =
+   red. Segments complete out of layout order as their responses land. */
+.cs2ps-loadbar {
+	position: absolute;
+	right: 10px;
+	bottom: 2px;
+	left: 10px;
+	display: flex;
+	gap: 3px;
+	/* Taller than the segments themselves to give tooltips a usable
+	   hover hit-area on the thin bar. */
+	padding: 5px 0;
+}
+
+.cs2ps-loadseg {
+	position: relative;
+	flex: 1 1 0;
+	height: 4px;
+	min-width: 0;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 2px;
+}
+
+.cs2ps-loadseg-fill {
+	position: absolute;
+	inset: 0;
+	background: var(--seg-color, #66c0f4);
+	transform: scaleX(0);
+	transform-origin: left center;
+}
+
+/* Settled with usable data — fills in from the left when the provider
+   response arrives. */
+.cs2ps-loadseg-done .cs2ps-loadseg-fill {
+	transform: scaleX(1);
+	transition: transform 450ms ease;
+}
+
+/* Currently being fetched — dim provider-color track… */
+.cs2ps-loadseg-active .cs2ps-loadseg-fill {
+	transform: scaleX(1);
+	opacity: 0.35;
+}
+
+/* …with a bright sweep traveling through it. Providers fetch in
+   parallel, so every in-flight segment sweeps simultaneously and fills
+   independently as its response arrives. */
+.cs2ps-loadseg-active::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(90deg, transparent, var(--seg-color, #66c0f4), transparent);
+	transform: translateX(-100%);
+	animation: cs2ps-loadseg-sweep 1.2s ease-in-out infinite;
+}
+
+@keyframes cs2ps-loadseg-sweep {
+	0% { transform: translateX(-100%); }
+	100% { transform: translateX(100%); }
+}
+
+/* Request failed or timed out. */
+.cs2ps-loadseg-error {
+	background: rgba(239, 68, 68, 0.16);
+}
+
+.cs2ps-loadseg-error .cs2ps-loadseg-fill {
+	transform: scaleX(1);
+	background: rgba(239, 68, 68, 0.5);
+}
+
+.cs2ps-banner-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	min-height: 44px;
+	cursor: pointer;
+	transition: background 150ms ease;
+}
+
+.cs2ps-banner-row:hover {
+	background: rgba(255, 255, 255, 0.03);
+}
+
+/* Game icon slot — empty placeholder until a CS2 logo asset lands. */
+.cs2ps-banner-gameicon {
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* Vertical stack: title on top, rank badges below. */
+.cs2ps-banner-info {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 3px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.cs2ps-banner-ranks {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	flex-wrap: nowrap;
+}
+
+.cs2ps-banner-rank {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	flex-shrink: 0;
+}
+
+/* Official FACEIT level medallion (lvl1–10 assets). */
+.cs2ps-faceit-lvl {
+	display: block;
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+/* CS2 Premier rating badge — parallelogram plate, accent bars + 5-slot tier progress */
+.cs2ps-pb-svg {
+	display: block;
+	flex-shrink: 0;
+	height: 21px;
+	width: auto;
+}
+
+/* Provider link buttons — stacked rows, each row rendered evenly sized
+   by the banner renderer so top/bottom rows never differ by >1 icon. */
+.cs2ps-banner-links {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: center;
+	gap: 4px;
+	flex: 0 1 auto;
+	max-width: 72px;
+	flex-shrink: 1;
+}
+
+.cs2ps-banner-link-row {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 4px;
+}
+
+.cs2ps-banner-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 21px;
+	height: 21px;
+	font-size: 12px;
+	text-decoration: none;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 3px;
+	transition: background 120ms ease;
+}
+
+.cs2ps-banner-link:hover {
+	background: rgba(255, 255, 255, 0.12);
+}
+
+.cs2ps-banner-link img,
+.cs2ps-banner-link svg {
+	display: block;
+	width: 12px;
+	height: 12px;
+}
+
+/* Radial trust score */
+.cs2ps-banner-trust {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+}
+
+.cs2ps-trust-radial {
+	display: block;
+}
+
+/* ── Modern floating tooltip (replaces native title) ── */
+.cs2ps-tip {
+	position: fixed;
+	z-index: 9999;
+	max-width: 260px;
+	padding: 8px 10px;
+	background: rgba(18, 26, 35, 0.97);
+	border: 1px solid rgba(102, 192, 244, 0.28);
+	border-radius: 6px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+	color: #d6d7d8;
+	font-family: "Motiva Sans", Arial, sans-serif;
+	font-size: 11px;
+	line-height: 15px;
+	pointer-events: none;
+	opacity: 0;
+	transform: translateY(3px);
+	transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.cs2ps-tip-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.cs2ps-tip-head {
+	color: #f1f4f6;
+	font-weight: 700;
+	margin-bottom: 3px;
+}
+
+.cs2ps-tip-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 18px;
+}
+
+.cs2ps-tip-key {
+	color: #8ea6b7;
+}
+
+.cs2ps-tip-val {
+	font-weight: 600;
+}
+
+/* ── Aggregation breakdown rows (hover tooltips) ── */
+.cs2ps-tip-desc {
+	color: #8ea6b7;
+	font-size: 10px;
+	line-height: 13px;
+	margin-bottom: 3px;
+}
+
+.cs2ps-tip-method {
+	color: #5c7382;
+	font-size: 9px;
+	font-style: italic;
+	margin-bottom: 4px;
+}
+
+.cs2ps-tip-sub-head {
+	color: #8ea6b7;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	margin: 6px 0 2px;
+}
+
+.cs2ps-tip-prov {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
+.cs2ps-tip-prov-icon {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	flex-shrink: 0;
+}
+
+.cs2ps-tip-prov-emoji {
+	font-size: 9px;
+	flex-shrink: 0;
+}
+
+.cs2ps-tip-prov-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cs2ps-tip-weight {
+	color: #66c0f4;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.cs2ps-tip-primary {
+	color: #eab308;
+	font-size: 10px;
+}
+
+.cs2ps-tip-sub {
+	color: #5c7382;
+	font-size: 9px;
+	margin-left: 4px;
+}
+
+/* Title + collapse glyph */
+.cs2ps-banner-title {
+	color: #8ea6b7;
+	font-size: 9px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cs2ps-banner-collapse {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.cs2ps-banner-chevron {
+	display: inline-block;
+	color: #6f8493;
+	font-size: 10px;
+	line-height: 1;
+	transition: transform 200ms ease;
+	transform: rotate(180deg);
+	flex-shrink: 0;
+}
+
+.cs2ps-banner-chevron-open {
+	transform: rotate(0deg);
+}
+
+/* ── Quake-style dropdown ────────────────────────────────────────── */
+
+.cs2ps-banner-dropdown {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1),
+				opacity 200ms ease;
+	opacity: 0;
+}
+
+.cs2ps-banner-dropdown-open {
+	max-height: 800px;
+	opacity: 1;
+	overflow-y: auto;
+	border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ── Dropdown sections ───────────────────────────────────────────── */
+
+.cs2ps-drop-section {
+	padding: 8px 12px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cs2ps-drop-section:last-child {
+	border-bottom: none;
+}
+
+.cs2ps-drop-heading {
+	color: #8ea6b7;
+	font-size: 8px;
+	font-weight: 700;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+	margin-bottom: 6px;
+}
+
+.cs2ps-drop-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 2px;
+}
+
+.cs2ps-drop-stat {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 4px;
+	padding: 4px 6px;
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 2px;
+}
+
+.cs2ps-drop-stat-label {
+	color: #6f8493;
+	font-size: 9px;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.2px;
+}
+
+.cs2ps-drop-stat-value {
+	color: #e0e6ea;
+	font-size: 11px;
+	font-weight: 700;
+	text-align: right;
+}
+
+.cs2ps-drop-stat-src {
+	display: flex;
+	gap: 2px;
+	margin-left: 4px;
+}
+
+.cs2ps-drop-src {
+	font-size: 8px;
+}
+
+.cs2ps-drop-src img {
+	display: block;
+	width: 10px;
+	height: 10px;
+}
+
+/* ── Commendations row (CSRep) ──
+   One-line icon + count chips; each chip carries its own hover tooltip. */
+.cs2ps-drop-commend-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+}
+
+.cs2ps-drop-commend {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 6px;
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 2px;
+}
+
+.cs2ps-drop-commend img {
+	display: block;
+	width: 12px;
+	height: 12px;
+}
+
+.cs2ps-drop-commend-count {
+	color: #e0e6ea;
+	font-size: 10px;
+	font-weight: 700;
+}
+
+/* ── Trust in dropdown ───────────────────────────────────────────── */
+
+.cs2ps-drop-trust-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.cs2ps-drop-trust-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 0;
+}
+
+.cs2ps-drop-trust-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.cs2ps-drop-trust-label {
+	color: #8ea6b7;
+	font-size: 10px;
+	flex: 1;
+}
+
+.cs2ps-drop-trust-val {
+	font-size: 12px;
+	font-weight: 700;
+}
+
+/* Inline "why below 100" reason rows under each trust provider. */
+.cs2ps-drop-trust-reasons {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	padding: 2px 0 4px 12px;
+}
+
+.cs2ps-drop-trust-reasons .cs2ps-tip-row {
+	gap: 12px;
+}
+
+.cs2ps-drop-trust-reasons .cs2ps-tip-key {
+	color: #5c7382;
+	font-size: 9px;
+}
+
+.cs2ps-drop-trust-reasons .cs2ps-tip-val {
+	font-size: 9px;
+}
+
+/* ── Histogram (dropdown) ────────────────────────────────────────── */
+
+.cs2ps-drop-histogram {
+	display: flex;
+	align-items: flex-end;
+	gap: 2px;
+	height: 40px;
+	padding: 4px 0;
+}
+
+.cs2ps-drop-bar {
+	flex: 1;
+	min-width: 4px;
+	border-radius: 1px 1px 0 0;
+	transition: height 300ms ease;
+}
+
+/* ── Clutch bars (dropdown) ──────────────────────────────────────── */
+
+.cs2ps-drop-clutch {
+	display: flex;
+	align-items: flex-end;
+	gap: 4px;
+	height: 50px;
+	padding: 4px 0;
+}
+
+.cs2ps-drop-clutch-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	flex: 1;
+}
+
+.cs2ps-drop-clutch-bar-wrap {
+	width: 100%;
+	height: 30px;
+	display: flex;
+	align-items: flex-end;
+}
+
+.cs2ps-drop-clutch-bar {
+	width: 100%;
+	border-radius: 2px 2px 0 0;
+	transition: height 300ms ease;
+}
+
+.cs2ps-drop-clutch-label {
+	color: #6f8493;
+	font-size: 7px;
+	font-weight: 600;
+}
+
+.cs2ps-drop-clutch-val {
+	color: #e0e6ea;
+	font-size: 8px;
+	font-weight: 700;
+}
+
+.cs2ps-drop-empty {
+	padding: 12px;
+	color: #6f8493;
+	font-size: 10px;
+	text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CS2 Breakdown (full detail panel)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.cs2ps-bd-root {
+	padding: 0;
+}
+
+.cs2ps-bd-section {
+	padding: 10px 12px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cs2ps-bd-section:last-child {
+	border-bottom: none;
+}
+
+.cs2ps-bd-section-title {
+	color: #8ea6b7;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.cs2ps-bd-section-count {
+	color: #5e7382;
+	font-size: 9px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* ── Provider overview ───────────────────────────────────────────── */
+
+.cs2ps-bd-prov-list {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+}
+
+.cs2ps-bd-prov-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 3px 8px;
+	font-size: 9px;
+	font-weight: 600;
+	color: var(--prov-color, #8ea6b7);
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 3px;
+}
+
+.cs2ps-bd-prov-badge img {
+	display: block;
+	width: 11px;
+	height: 11px;
+}
+
+.cs2ps-bd-prov-unknown {
+	color: #6f8493;
+}
+
+.cs2ps-bd-prov-count {
+	margin-left: 4px;
+	color: #5e7382;
+	font-size: 9px;
+	font-weight: 500;
+}
+
+/* ── Stat grid ───────────────────────────────────────────────────── */
+
+.cs2ps-bd-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1px;
+}
+
+.cs2ps-bd-stat {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 4px;
+	padding: 5px 8px;
+	background: rgba(0, 0, 0, 0.12);
+	border-radius: 2px;
+}
+
+.cs2ps-bd-highlight {
+	background: rgba(102, 192, 244, 0.06);
+}
+
+.cs2ps-bd-stat-label {
+	color: #6f8493;
+	font-size: 9px;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.2px;
+	flex-shrink: 0;
+}
+
+.cs2ps-bd-stat-value {
+	color: #e0e6ea;
+	font-size: 11px;
+	font-weight: 700;
+	text-align: right;
+	display: flex;
+	align-items: center;
+	gap: 3px;
+}
+
+.cs2ps-bd-multi {
+	color: #22c55e;
+	font-size: 8px;
+	font-weight: 700;
+}
+
+.cs2ps-bd-stat-src {
+	display: flex;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+.cs2ps-bd-src {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	font-size: 8px;
+	color: var(--src-color, #8ea6b7);
+	background: rgba(255, 255, 255, 0.04);
+	border-radius: 2px;
+}
+
+.cs2ps-bd-src img {
+	display: block;
+	width: 10px;
+	height: 10px;
+}
+
+/* ── Trust section ───────────────────────────────────────────────── */
+
+.cs2ps-bd-trust {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.cs2ps-bd-trust-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 3px;
+}
+
+.cs2ps-bd-trust-name {
+	color: #8ea6b7;
+	font-size: 10px;
+	font-weight: 600;
+	flex-shrink: 0;
+}
+
+.cs2ps-bd-trust-score {
+	color: #e0e6ea;
+	font-size: 12px;
+	font-weight: 700;
+	flex: 1;
+}
+
+.cs2ps-bd-trust-label {
+	color: #6f8493;
+	font-size: 9px;
+	font-weight: 500;
+}
+
+.cs2ps-bd-trust-factors {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 8px;
+	padding: 4px 8px;
+}
+
+.cs2ps-bd-trust-factor {
+	color: #6f8493;
+	font-size: 9px;
+}
+
+.cs2ps-bd-trust-detail {
+	color: #6f8493;
+	font-size: 9px;
+	padding: 2px 8px;
+}
+
+.cs2ps-bd-trust-ban {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 8px;
+	color: #f59e0b;
+	font-size: 10px;
+	font-weight: 600;
+	background: rgba(245, 158, 11, 0.08);
+	border-radius: 3px;
+}
+
+.cs2ps-positive { color: #22c55e; }
+.cs2ps-negative { color: #ef4444; }
+
+/* ── Clutch bars ─────────────────────────────────────────────────── */
+
+.cs2ps-bd-clutch {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.cs2ps-bd-clutch-row {
+	display: grid;
+	grid-template-columns: 52px 1fr 100px 45px 52px auto;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 0;
+}
+
+.cs2ps-bd-clutch-label {
+	color: #8ea6b7;
+	font-size: 9px;
+	font-weight: 600;
+	text-align: center;
+}
+
+.cs2ps-bd-clutch-bar-wrap {
+	height: 8px;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.cs2ps-bd-clutch-bar {
+	height: 100%;
+	border-radius: 2px;
+	transition: width 400ms ease;
+}
+
+.cs2ps-bd-clutch-val {
+	color: #6f8493;
+	font-size: 9px;
+	text-align: right;
+}
+
+.cs2ps-bd-clutch-pct {
+	color: #e0e6ea;
+	font-size: 10px;
+	font-weight: 700;
+	text-align: right;
+}
+
+.cs2ps-bd-clutch-one {
+	color: #6f8493;
+	font-size: 9px;
+	text-align: right;
+}
+
+.cs2ps-bd-clutch-src {
+	display: flex;
+	gap: 2px;
+	justify-content: flex-end;
+}
+
+/* ── Kill breakdown ──────────────────────────────────────────────── */
+
+.cs2ps-bd-kb {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.cs2ps-bd-kb-item {
+	display: grid;
+	grid-template-columns: 1fr 50px 65px auto;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 0;
+}
+
+.cs2ps-bd-kb-label {
+	color: #8ea6b7;
+	font-size: 9px;
+	font-weight: 500;
+	text-transform: capitalize;
+}
+
+.cs2ps-bd-kb-val {
+	color: #e0e6ea;
+	font-size: 10px;
+	font-weight: 700;
+	text-align: right;
+}
+
+.cs2ps-bd-kb-count {
+	color: #6f8493;
+	font-size: 9px;
+	text-align: right;
+}
+
+.cs2ps-bd-kb-src {
+	display: flex;
+	gap: 2px;
+	justify-content: flex-end;
+}
+
+/* ── Match history ───────────────────────────────────────────────── */
+
+.cs2ps-bd-matches {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.cs2ps-bd-match {
+	display: grid;
+	grid-template-columns: 22px 1fr 45px 55px 45px 45px auto;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 0;
+	font-size: 9px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.cs2ps-bd-match:last-child {
+	border-bottom: none;
+}
+
+.cs2ps-bd-match-result {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	font-size: 9px;
+	font-weight: 700;
+	border-radius: 2px;
+}
+
+.cs2ps-bd-match-win { color: #22c55e; background: rgba(34, 197, 94, 0.15); }
+.cs2ps-bd-match-loss { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+.cs2ps-bd-match-unknown { color: #6f8493; background: rgba(111, 132, 147, 0.1); }
+
+.cs2ps-bd-match-map {
+	color: #e0e6ea;
+	font-weight: 600;
+	font-size: 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cs2ps-bd-match-score { color: #8ea6b7; font-weight: 600; text-align: right; }
+.cs2ps-bd-match-kd { color: #cbd5dc; text-align: right; }
+.cs2ps-bd-match-adr, .cs2ps-bd-match-rating { color: #6f8493; text-align: right; }
+
+.cs2ps-bd-match-src {
+	display: flex;
+	gap: 2px;
+	justify-content: flex-end;
 }

@@ -1,9 +1,9 @@
 {
 	"$schema": "https://raw.githubusercontent.com/SteamClientHomebrew/Millennium/main/src/system/plugin-schema.json",
-	"name": "cs2-profile-stats",
-	"common_name": "CS2 Profile Stats",
+	"name": "cs2-profile",
+	"common_name": "CS2 Profile",
 	"description": "Displays useful Leetify, FACEIT, and Steam CS2 statistics directly on Steam profiles.",
-	"version": "0.4.5",
+	"version": "0.5.0",
 	"backendType": "lua",
 	"webkitApiVersion": "2.0.0",
 	"include": ["static", "README.md", "LICENSE"]
