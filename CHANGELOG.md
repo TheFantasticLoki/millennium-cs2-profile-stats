@@ -12,6 +12,9 @@ All notable changes to this project are documented here. The project follows [Se
 
 ### Fixed
 
+- Fix providers freezing permanently after running for a while (only Leetify kept loading; CSRep/CSTracker/CSStats showed nothing or ancient data). When a provider fetch was already in flight, the backend served stale cache **without pumping the shared libcurl session** — and curl transfers only advance while the session is pumped, so those in-flight requests froze for hours (logs showed `fetch finished in 1882140ms` / `57532284ms`) and every later call kept hitting the same wedged pipeline. Route calls now always pump toward their own provider before falling back to stale data.
+- Evict stalled pipelines: a pipeline that hasn't reached a terminal state within 3 minutes is dropped and restarted on the next request, instead of blocking that provider forever. Late completions from an evicted pipeline are discarded via a generation tag so they can't corrupt the replacement pipeline's state machine.
+- Stop misclassifying FlareSolverr transport failures (timeouts, connection resets) as `cloudflare_required` in the CSRep cookie and CSTracker page pipelines. Those are now transient `error` responses (never cached), so a network blip no longer negative-caches "requires FlareSolverr / visit to verify" for minutes.
 - Stop discarding provider responses that arrive after the frontend's initial 15s wait: slow providers are now only flagged as slow, and their data appears as soon as the backend finishes fetching it — no page refresh needed.
 - Only request providers the backend actually has registered and enabled (via `get_provider_configs`), so unimplemented or disabled providers no longer hang or pollute the loading state.
 

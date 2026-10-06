@@ -47,6 +47,20 @@ local RECENT_WINDOW_MS = 30000
 local NEGATIVE_TTL = 300
 local TRANSIENT_TTL = 120
 
+---A pipeline older than this that hasn't reached a terminal state is
+---dropped and restarted. Curl transfers only advance while the session is
+---pumped; a pipeline whose route calls all took the serve-stale shortcut
+---used to freeze for hours and block fresh fetches. Longest legitimate
+---pipeline ≈ 110s (CSStats page 45s + FlareSolverr 65s), so 180s leaves
+---generous headroom while still reaping zombies within one profile view.
+local PIPELINE_MAX_AGE_MS = 180000
+
+---Monotonic pipeline generation. Tagged onto every request so that when a
+---stalled pipeline is evicted and replaced (same key), late completions
+---from the old pipeline are dropped instead of being routed into the
+---successor's state machine.
+local pipeline_serial = 0
+
 ---Canonical fetch priority: fast public APIs first, HTML scrapers last.
 ---Mirrors the frontend's PROVIDER_ORDER in webkit/index.tsx.
 local FETCH_PRIORITY = { "leetify", "faceit", "csrep", "cstracker", "csstats" }
@@ -112,6 +126,16 @@ local function cache_provider_result(name, steam_id, result)
     -- plain "error" is never cached
 end
 
+---Fetch a just-completed uncacheable result (plain "error" responses
+---are never pinned to the cache — see cache_provider_result).
+local function take_recent(key)
+    local r = recent[key]
+    if r ~= nil and (ffi_http.wall_ms() - r.at) < RECENT_WINDOW_MS then
+        return r.result
+    end
+    return nil
+end
+
 -- ---------------------------------------------------------------------------
 -- Pipelines
 -- ---------------------------------------------------------------------------
@@ -132,7 +156,14 @@ end
 local function ensure_pipeline(name, steam_id)
     local key = name .. ":" .. steam_id
     if pipelines[key] ~= nil then
-        return pipelines[key]
+        local existing = pipelines[key]
+        local age_ms = ffi_http.wall_ms() - (existing.started_ms or 0)
+        if age_ms <= PIPELINE_MAX_AGE_MS then
+            return existing
+        end
+        logger:warn("[" .. name .. "] dropping stalled pipeline for " .. steam_id ..
+            " (age " .. math.floor(age_ms) .. "ms); restarting fetch")
+        pipelines[key] = nil
     end
     local def = reg.get(name)
     if def == nil or type(def.pipeline) ~= "function" then
@@ -151,6 +182,8 @@ local function ensure_pipeline(name, steam_id)
     p.key = key
     p.inflight = 0
     p.started_ms = ffi_http.wall_ms()
+    pipeline_serial = pipeline_serial + 1
+    p.gen = pipeline_serial
     if type(p.finish) ~= "function" then
         function p:finish(json)
             self.finished = true
@@ -176,6 +209,7 @@ local function submit_pipeline(p, s)
     end
     for _, req in ipairs(reqs) do
         req.id = req.id or (p.key .. "|" .. tostring(req.tag or #reqs))
+        req.pipeline_gen = p.gen
         local rid, err = s:submit(req)
         if rid == nil then
             logger:warn("[" .. p.name .. "] request submit failed: " .. tostring(err))
@@ -262,6 +296,15 @@ local function pump_all(deadline_ms, target_key)
         for _, resp in ipairs(s:take_completed()) do
             local key, tag = tostring(resp.id):match("^(.-)|(.+)$")
             local p = key and pipelines[key] or nil
+            -- A completion from a pipeline that was evicted (stalled) and
+            -- replaced shares the key but not the generation — drop it
+            -- rather than feed it into the successor's state machine.
+            if p ~= nil and resp.req ~= nil and resp.req.pipeline_gen ~= nil
+                and p.gen ~= nil and resp.req.pipeline_gen ~= p.gen then
+                logger:warn("[" .. tostring(p.name or key) ..
+                    "] dropping completion from replaced pipeline: " .. tostring(resp.id))
+                p = nil
+            end
             dlog("completion id=%s -> key=%s tag=%s found=%s", tostring(resp.id), tostring(key), tostring(tag), tostring(p ~= nil))
             if p ~= nil then
                 p.inflight = math.max(0, (p.inflight or 1) - 1)
@@ -322,50 +365,44 @@ function coordinator.get(name, steam_id)
 
     local key = name .. ":" .. steam_id
 
-    ---Fetch a just-completed uncacheable result (plain "error" responses
-    ---are never pinned to the cache — see cache_provider_result).
-    local function take_recent()
-        local r = recent[key]
-        if r ~= nil and (ffi_http.wall_ms() - r.at) < RECENT_WINDOW_MS then
-            return r.result
-        end
-        return nil
-    end
-
-    -- Coalescing: an identical fetch is already pumping — serve stale.
+    -- Coalescing: an identical fetch is already in flight. ALWAYS pump the
+    -- shared session toward this pipeline before answering — curl
+    -- transfers only advance while the session is pumped, so the old
+    -- serve-stale-without-pumping shortcut froze in-flight providers for
+    -- hours (logs showed "fetch finished in 57532284ms") and blocked all
+    -- fresh fetches for them. A fresh result wins; stale is the fallback
+    -- once this call's pump budget is spent.
     if pipelines[key] ~= nil then
-        local stale = cache:get_stale(name, steam_id)
-        if stale ~= nil then
-            logger:info("[" .. name .. "] fetch already in flight for " .. steam_id .. "; serving stale cache")
-            return stale
-        end
-        -- No stale copy: pump the shared session a bit — the pipeline may
-        -- complete inside this call's budget.
-        if coordinator.parallel_available() then
-            pump_all(ffi_http.wall_ms() + BUDGET_MS, key)
-            -- The pump may have completed the target with an uncacheable
-            -- "error" result — serve it from the recent map, not a timeout
-            -- message.
-            local result = cache:get(name, steam_id) or take_recent()
+        local age_ms = ffi_http.wall_ms() - (pipelines[key].started_ms or 0)
+        if age_ms > PIPELINE_MAX_AGE_MS then
+            logger:warn("[" .. name .. "] evicting stalled pipeline for " .. steam_id ..
+                " (age " .. math.floor(age_ms) .. "ms); restarting fetch")
+            pipelines[key] = nil
+        else
+            if coordinator.parallel_available() then
+                pump_all(ffi_http.wall_ms() + BUDGET_MS, key)
+            end
+            local result = cache:get(name, steam_id) or take_recent(key)
             if result ~= nil then
                 return result
             end
             local stale = cache:get_stale(name, steam_id)
             if stale ~= nil then
+                logger:info("[" .. name .. "] fetch still in flight for " .. steam_id .. "; serving stale cache")
                 return stale
             end
+            return reg.encode({
+                status = "error",
+                message = (def.display_name or name) .. " is still fetching; try again shortly.",
+            })
         end
-        return reg.encode({
-            status = "error",
-            message = (def.display_name or name) .. " is still fetching; try again shortly.",
-        })
     end
 
     -- Parallel path: fan out every unfinished enabled provider.
     if coordinator.parallel_available() then
         -- A just-completed uncacheable result (plain "error") beats a
         -- pointless re-fetch during the frontend's call burst.
-        local early_recent = take_recent()
+        local early_recent = take_recent(key)
         if early_recent ~= nil then
             return early_recent
         end
@@ -385,7 +422,7 @@ function coordinator.get(name, steam_id)
         local pumped_ms = math.floor(ffi_http.wall_ms() - t0)
 
         if pipelines[key] == nil then
-            local result = cache:get(name, steam_id) or take_recent()
+            local result = cache:get(name, steam_id) or take_recent(key)
             if result ~= nil then
                 logger:info("[" .. name .. "] served after " .. pumped_ms .. "ms pump for " .. steam_id)
                 return result
@@ -398,7 +435,7 @@ function coordinator.get(name, steam_id)
                 "ms for " .. steam_id .. "; serving stale cache")
             return stale
         end
-        local recent_result = take_recent()
+        local recent_result = take_recent(key)
         if recent_result ~= nil then
             return recent_result
         end

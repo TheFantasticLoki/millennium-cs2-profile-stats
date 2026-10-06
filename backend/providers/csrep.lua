@@ -495,6 +495,14 @@ function csrep.pipeline(steam_id)
             local cookie = http_utils.fs_cf_cookie(solution)
             if cookie == nil then
                 logger:warn("CSRep: failed to get cookie: " .. tostring(err))
+                -- Transport-level failure (timeout, connection reset) is
+                -- transient: report a plain error (never cached) instead of
+                -- cloudflare_required, which would negative-cache "requires
+                -- FlareSolverr" even though FlareSolverr is fine.
+                if resp == nil or resp.status == nil then
+                    p:finish(reg.provider_error("CSRep", 0, tostring(err)))
+                    return
+                end
                 p:finish(reg.encode({
                     status = "cloudflare_required",
                     message = "CSRep requires FlareSolverr. " .. tostring(err),

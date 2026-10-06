@@ -860,6 +860,14 @@ function cstracker.pipeline(steam_id)
             local solution, err = http_utils.fs_solution(resp)
             if solution == nil then
                 logger:warn("CSTracker: FlareSolverr retry failed: " .. tostring(err))
+                -- Transport-level failure (timeout, connection reset) is
+                -- transient: report a plain error (never cached) instead of
+                -- cloudflare_required, which would negative-cache "visit to
+                -- verify" even though FlareSolverr is fine.
+                if resp == nil or resp.status == nil then
+                    p:finish(reg.provider_error("CSTracker", 0, tostring(err)))
+                    return
+                end
                 p:finish(reg.encode({
                     status = "cloudflare_required",
                     message = "Visit cstracker.gg to complete verification, then retry.",
