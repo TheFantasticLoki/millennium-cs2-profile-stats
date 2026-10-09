@@ -105,6 +105,21 @@ function coordinator.parallel_available()
     return s ~= nil
 end
 
+---Release the shared HTTP session and forget all pipeline state. Called on
+---plugin unload so in-flight curl transfers (easy handles, body buffers,
+---sockets) are freed here instead of lingering in the lua-host process
+---until teardown. A reload creates a fresh session on the next route call.
+function coordinator.shutdown()
+    if session ~= nil then
+        pcall(function() session:destroy() end)
+        session = nil
+    end
+    pipelines = {}
+    recent = {}
+    legacy_inflight = {}
+    pumping = false
+end
+
 -- ---------------------------------------------------------------------------
 -- Cache helpers (per-status TTLs — identical to legacy main.lua)
 -- ---------------------------------------------------------------------------
@@ -143,7 +158,17 @@ end
 local function finish_pipeline(p, result_json)
     pipelines[p.key] = nil
     cache_provider_result(p.name, p.steam_id, result_json)
-    recent[p.key] = { result = result_json, at = ffi_http.wall_ms() }
+    -- Prune just-completed results outside the serve window before inserting
+    -- so this map cannot grow without bound across a long Steam session
+    -- (without this it kept one full JSON payload per errored provider ×
+    -- profile ever viewed).
+    local now_ms = ffi_http.wall_ms()
+    for k, v in pairs(recent) do
+        if now_ms - v.at >= RECENT_WINDOW_MS then
+            recent[k] = nil
+        end
+    end
+    recent[p.key] = { result = result_json, at = now_ms }
     local ms = (p.started_ms and ffi_http and ffi_http.wall_ms and
         math.floor(ffi_http.wall_ms() - p.started_ms)) or -1
     dlog("FINISH %s after %dms", p.name, ms)
@@ -250,6 +275,23 @@ local function pump_all(deadline_ms, target_key)
         return false
     end
     pumping = true
+
+    -- Global sweep: evict EVERY pipeline older than the max age, not just
+    -- the key being requested. When a user closes the profile page
+    -- mid-fetch, its pipelines are abandoned with no route call coming back
+    -- for those keys — without this sweep their state tables (including
+    -- scraped HTML fragments held by CSTracker/CSStats) accumulated for the
+    -- whole Steam session. Late completions from swept pipelines are dropped
+    -- by the generation check below.
+    local sweep_now = ffi_http.wall_ms()
+    for key, p in pairs(pipelines) do
+        local age = p.started_ms and (sweep_now - p.started_ms) or 0
+        if not p.finished and age > PIPELINE_MAX_AGE_MS then
+            logger:warn("[" .. tostring(p.name or key) .. "] sweeping abandoned pipeline for " ..
+                tostring(p.steam_id or "?") .. " (age " .. math.floor(age) .. "ms)")
+            pipelines[key] = nil
+        end
+    end
 
     local guard = 0
     while ffi_http.wall_ms() < deadline_ms do
@@ -391,8 +433,13 @@ function coordinator.get(name, steam_id)
                 logger:info("[" .. name .. "] fetch still in flight for " .. steam_id .. "; serving stale cache")
                 return stale
             end
+            -- Retryable: the fetch IS running (we just spent this call's
+            -- pump budget on it, or a nested EVALUATE hit the coordinator
+            -- mid-pump). The frontend re-requests on a short delay; each
+            -- retry pumps the shared session again until the result lands.
             return reg.encode({
                 status = "error",
+                retryable = true,
                 message = (def.display_name or name) .. " is still fetching; try again shortly.",
             })
         end
@@ -443,6 +490,7 @@ function coordinator.get(name, steam_id)
             "ms for " .. steam_id .. " with no result")
         return reg.encode({
             status = "error",
+            retryable = true,
             message = (def.display_name or name) .. " is taking too long; try again shortly.",
         })
     end
@@ -498,6 +546,7 @@ function coordinator.get_all(steam_id)
                 if result == nil then
                     result = reg.encode({
                         status = "error",
+                        retryable = true,
                         message = (pdef.display_name or pname) .. " is taking too long; try again shortly.",
                     })
                 end

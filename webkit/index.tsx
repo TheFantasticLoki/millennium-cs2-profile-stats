@@ -41,9 +41,14 @@ type ProviderResponse<T> = {
 	data?: T;
 	fetched_at?: number;
 	/** Set once the soft threshold passes — the response is still awaited;
-	 *  this only flags that the provider is slow (the backend Lua VM
-	 *  fetches providers serially, so later ones routinely exceed it). */
+	 *  this only flags that the provider is slow (the backend fetches all
+	 *  providers concurrently, so FlareSolverr-backed scrapers routinely
+	 *  exceed it). */
 	slow?: boolean;
+	/** Backend marks transient "still fetching / budget exhausted" errors
+	 *  with this flag: the fetch IS running server-side, so the frontend
+	 *  re-requests on a short delay instead of settling as a hard error. */
+	retryable?: boolean;
 };
 
 type LeetifyProfile = {
@@ -479,6 +484,9 @@ const PROVIDER_REQUESTS: Record<
 const PROVIDER_SLOW_MS = 15_000;
 /** Hard cap: give up only on requests that never settle at all. */
 const PROVIDER_HARD_MS = 120_000;
+/** Delay before re-requesting a provider the backend marked retryable
+ *  (its pump budget expired while the fetch was still in flight). */
+const PROVIDER_RETRY_DELAY_MS = 3_000;
 const STEAM_TIMEOUT_MS = 8_000;
 
 const isProfilePage = () =>
@@ -526,45 +534,73 @@ const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number, message: string
  * timeout only flags an individual provider as slow; its response is
  * still applied whenever it arrives. The hard cap exists solely for
  * requests that never settle at all.
+ *
+ * When the backend's pump budget expires while a provider is still in
+ * flight it answers with a retryable error (the fetch keeps running in
+ * the shared curl session). Those are re-requested on a short delay —
+ * each retry pumps the backend session again — instead of being shown as
+ * a permanent failure. Without this, a provider that needed slightly
+ * longer than one pump window displayed an error forever even though the
+ * backend finished it seconds later.
  */
 const requestProvider = <T,>(
-	request: Promise<unknown>,
+	makeRequest: () => Promise<unknown>,
 	parse: (raw: unknown) => ProviderResponse<T>,
 	label: string,
 	onSettle: (response: ProviderResponse<T>) => void,
 ): void => {
+	const startedAt = Date.now();
 	let settled = false;
+	let attemptId = 0;
+	const settle = (response: ProviderResponse<T>) => {
+		if (settled) return;
+		settled = true;
+		window.clearTimeout(slowTimer);
+		window.clearTimeout(hardTimer);
+		onSettle(response);
+	};
 	const slowTimer = window.setTimeout(() => {
 		if (settled) return;
 		onSettle({ status: 'loading', slow: true });
 	}, PROVIDER_SLOW_MS);
 	const hardTimer = window.setTimeout(() => {
 		if (settled) return;
-		settled = true;
-		window.clearTimeout(slowTimer);
 		console.warn(`[CS2 Profile Stats] ${label} never responded; giving up after ${PROVIDER_HARD_MS / 1000}s.`);
-		onSettle({ status: 'error', message: `${label} request timed out.` });
+		settle({ status: 'error', message: `${label} request timed out.` });
 	}, PROVIDER_HARD_MS);
-	request.then(
-		(raw) => {
-			if (settled) return;
-			settled = true;
-			window.clearTimeout(slowTimer);
-			window.clearTimeout(hardTimer);
-			try {
-				onSettle(parse(raw));
-			} catch (error) {
-				onSettle({ status: 'error', message: error instanceof Error ? error.message : String(error) });
-			}
-		},
-		(error) => {
-			if (settled) return;
-			settled = true;
-			window.clearTimeout(slowTimer);
-			window.clearTimeout(hardTimer);
-			onSettle({ status: 'error', message: error instanceof Error ? error.message : String(error) });
-		},
-	);
+	const attempt = () => {
+		const myId = ++attemptId;
+		makeRequest().then(
+			(raw) => {
+				// A newer attempt superseded this one, or we already settled.
+				if (settled || myId !== attemptId) return;
+				let response: ProviderResponse<T>;
+				try {
+					response = parse(raw);
+				} catch (error) {
+					settle({ status: 'error', message: error instanceof Error ? error.message : String(error) });
+					return;
+				}
+				// Backend says the fetch is still running server-side — keep
+				// the segment active and ask again shortly.
+				if (
+					response.status === 'error' &&
+					response.retryable === true &&
+					Date.now() - startedAt + PROVIDER_RETRY_DELAY_MS < PROVIDER_HARD_MS
+				) {
+					onSettle({ status: 'loading', slow: true });
+					window.setTimeout(attempt, PROVIDER_RETRY_DELAY_MS);
+					return;
+				}
+				settle(response);
+			},
+			(error) => {
+				if (settled || myId !== attemptId) return;
+				settle({ status: 'error', message: error instanceof Error ? error.message : String(error) });
+			},
+		);
+	};
+	attempt();
 };
 
 const fetchWithTimeout = async (input: RequestInfo | URL, init: RequestInit = {}, timeoutMs = STEAM_TIMEOUT_MS) => {
@@ -1537,7 +1573,10 @@ const renderCard = (root: HTMLElement, state: ViewState, steamId: string) => {
 			.catch((error) => {
 				state.inventory = { status: 'error', message: error instanceof Error ? error.message : String(error) };
 			})
-			.finally(() => renderCard(root, state, steamId));
+			.finally(() => {
+				if (!root.isConnected) return;
+				renderCard(root, state, steamId);
+			});
 	});
 };
 
@@ -1761,7 +1800,10 @@ export default async function WebkitMain() {
 		.catch((error) => {
 			console.warn('[CS2 Profile Stats] Steam games are unavailable:', error);
 		})
-		.finally(() => renderCard(root, state, steamId));
+		.finally(() => {
+			if (!root.isConnected) return;
+			renderCard(root, state, steamId);
+		});
 
 	// Ask the backend which providers are actually registered and enabled.
 	// The Lua VM fetches serially, so only participating providers are
@@ -1797,10 +1839,17 @@ export default async function WebkitMain() {
 		const def = PROVIDER_DEFS[name];
 		const request = PROVIDER_REQUESTS[name];
 		requestProvider(
-			request.callable({ steamId }),
+			// Factory (not a pre-started promise) so retryable backend
+			// responses can re-invoke the callable — each retry pumps the
+			// backend's shared fetch session again.
+			() => request.callable({ steamId }),
 			request.parse,
 			def.label,
 			(response) => {
+				// The page may have been torn down (navigation/close) while
+				// the request was in flight — don't render into a detached
+				// tree or touch freed state.
+				if (!root.isConnected) return;
 				// Provider keys are dynamic; ViewState maps them 1:1 to responses.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(state as any)[name] = response;

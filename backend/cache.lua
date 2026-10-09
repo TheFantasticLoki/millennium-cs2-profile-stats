@@ -30,6 +30,18 @@ local DEFAULT_TTLS = {
     aggregated = 900,     -- 15 minutes (same as shortest individual provider)
 }
 
+---Hard cap on retained cache entries. Expired entries are kept briefly so
+---get_stale can serve them while a refresh runs (stale-while-revalidate),
+---but without a cap the store grew without bound across a long Steam
+---session — every profile view added provider × SteamID JSON payloads that
+---were never released.
+local MAX_ENTRIES = 256
+
+---How long an expired entry is retained for stale serving (seconds) before
+---eviction may reclaim it. Comfortably exceeds the longest provider TTL
+---reuse window observed in practice (a few profile re-views).
+local STALE_RETENTION_S = 3600
+
 ---Create a new CacheManager instance.
 ---@return CacheManager
 function CacheManager.new()
@@ -95,6 +107,47 @@ function CacheManager:get_stale(provider_name, steam_id)
     return entry.data
 end
 
+---Evict entries the store can afford to lose: anything expired beyond the
+---stale-retention window first, then (if still over the cap) the oldest
+---fetched entries regardless of freshness. Called from set() so the store
+---stays bounded without a background timer.
+---@param now number current unix time
+function CacheManager:_prune(now)
+    local count = 0
+    for _ in pairs(self._store) do count = count + 1 end
+    if count <= MAX_ENTRIES then
+        -- Under cap: still reclaim entries too old to be useful as stale.
+        for key, entry in pairs(self._store) do
+            if now >= entry.expires_at + STALE_RETENTION_S then
+                self._store[key] = nil
+            end
+        end
+        return
+    end
+    -- Over cap: drop long-expired entries, then oldest-first until under.
+    local entries = {}
+    for key, entry in pairs(self._store) do
+        entries[#entries + 1] = { key = key, fetched_at = entry.fetched_at, expires_at = entry.expires_at }
+    end
+    table.sort(entries, function(a, b) return a.fetched_at < b.fetched_at end)
+    local excess = count - MAX_ENTRIES
+    for _, entry in ipairs(entries) do
+        if excess <= 0 then break end
+        if now >= entry.expires_at + STALE_RETENTION_S or entry.fetched_at < now - STALE_RETENTION_S then
+            self._store[entry.key] = nil
+            excess = excess - 1
+        end
+    end
+    -- Still over cap (everything is fresh): evict oldest regardless.
+    for _, entry in ipairs(entries) do
+        if excess <= 0 then break end
+        if self._store[entry.key] ~= nil then
+            self._store[entry.key] = nil
+            excess = excess - 1
+        end
+    end
+end
+
 ---Store a response in the cache.
 ---@param provider_name string
 ---@param steam_id string
@@ -109,6 +162,7 @@ function CacheManager:set(provider_name, steam_id, data, ttl_override)
         fetched_at = now,
         expires_at = now + ttl,
     }
+    self:_prune(now)
 end
 
 ---Invalidate all cached entries for a steam ID (used on page reload).

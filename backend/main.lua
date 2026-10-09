@@ -50,6 +50,10 @@ end
 
 local function on_unload()
     logger:info("Unloading CS2 Profile Stats")
+    -- Tear down the shared libcurl session and pipeline state so a plugin
+    -- toggle-off doesn't leave in-flight transfers (sockets, easy handles,
+    -- body buffers) resident in the lua-host process until Steam exits.
+    pcall(coordinator.shutdown)
 end
 
 ---IPC: Get plugin preferences.

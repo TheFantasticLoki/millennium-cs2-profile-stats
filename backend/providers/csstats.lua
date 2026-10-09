@@ -690,10 +690,14 @@ function csstats.pipeline(steam_id)
             p.queue = { req }
         elseif p.phase == "fs" then
             logger:info("CSStats: retrying via FlareSolverr")
+            -- Named session: reuse one FlareSolverr browser (and its
+            -- cf_clearance cookie) across scrapes instead of spawning a
+            -- fresh headless instance per request.
             local req = http_utils.fs_req(http_utils.flaresolverr_url(), {
                 cmd = "request.get",
                 url = stats_url,
                 maxTimeout = 60000,
+                session = "csstats",
                 userAgent = http_utils.chrome_user_agent(),
             }, 60)
             req.tag = "fs"

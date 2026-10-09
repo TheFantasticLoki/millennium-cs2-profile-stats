@@ -810,10 +810,15 @@ function cstracker.pipeline(steam_id)
             p.queue = { req }
         elseif p.phase == "fs_page" then
             local fs_url = http_utils.flaresolverr_url()
+            -- Named session: FlareSolverr keeps the browser (and its
+            -- cf_clearance cookie) alive across requests, so repeated
+            -- profile views reuse one browser instead of spawning a fresh
+            -- headless instance per scrape.
             local req = http_utils.fs_req(fs_url, {
                 cmd = "request.get",
                 url = profile_url,
                 maxTimeout = 12000,
+                session = "cstracker",
                 userAgent = http_utils.chrome_user_agent(),
             }, 30)
             req.tag = "fs_page"
